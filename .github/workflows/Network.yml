@@ -1,12 +1,7 @@
 name: Deploy VPC Network CloudFormation
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'cloudformation/**'
-  workflow_dispatch:
+  workflow_dispatch: null
 
 permissions:
   id-token: write
