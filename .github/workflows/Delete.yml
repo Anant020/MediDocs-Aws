@@ -1,0 +1,46 @@
+name: Delete CloudFormation Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack_name:
+        description: CloudFormation stack to delete
+        required: true
+        type: choice
+        options:
+          - medidocs-network
+          - medidocs-storage
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Delete CloudFormation stack
+        run: |
+          aws cloudformation delete-stack \
+            --stack-name "${{ inputs.stack_name }}" \
+            --region "${{ env.AWS_REGION }}"
+
+      - name: Wait for stack deletion
+        run: |
+          aws cloudformation wait stack-delete-complete \
+            --stack-name "${{ inputs.stack_name }}" \
+            --region "${{ env.AWS_REGION }}"
+
+      - name: Confirm deletion
+        run: |
+          echo "Stack '${{ inputs.stack_name }}' deleted successfully."
